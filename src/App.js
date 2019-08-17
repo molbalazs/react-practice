@@ -1,26 +1,46 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {getRepositories, getCommits} from './services/Data';
+import List from './components/List'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      repositories: [],
+      commits: [],
+      error: null,
+    };
+
+    getRepositories()
+      .then((repositories) => this.setState({
+        repositories: repositories.map((repo) => {
+          return {
+            name: repo.name,
+            onClick: this.populateCommitsList.apply(this, [repo.commitsUrl])
+          }
+
+        })
+      }))
+      .catch(err => {
+        this.setState({error: err.message});
+      })
+  }
+
+  populateCommitsList(url) {
+    getCommits(url)
+      .then((commits) => this.setState({ commits }))
+      .catch(err => {
+        this.setState({error: err.message});
+      });
+  }
+
+  render() {
+      return <div>
+        <div className="error">{this.state.error}</div>
+        <List data = {this.state.repositories}/>
+        <List data = {this.state.commits} />
+      </div>;
+  }
 }
-
-export default App;
