@@ -16,19 +16,28 @@ export default class App extends React.Component {
     getRepositories()
       .then((repositories) => this.setState({
         repositories: repositories.map((repo) => {
+
+          let onClick = () => {
+            getCommits(repo.commitsUrl)
+              .then((commits) => this.setState({ commits }))
+              .catch(err => {
+                this.setState({error: err.message});
+              });
+          }
           return {
-            name: repo.name,
-            onClick: this.populateCommitsList.apply(this, [repo.commitsUrl])
+            onClick,
+            text: repo.name,
           }
 
         })
       }))
       .catch(err => {
         this.setState({error: err.message});
-      })
+      });
   }
 
-  populateCommitsList(url) {
+  populateCommitsList() {
+    let url = this.commitsUrl;
     getCommits(url)
       .then((commits) => this.setState({ commits }))
       .catch(err => {
@@ -40,7 +49,9 @@ export default class App extends React.Component {
       return <div>
         <div className="error">{this.state.error}</div>
         <List data = {this.state.repositories}/>
-        <List data = {this.state.commits} />
+        <List data = {this.state.commits.map((response) => {
+          return { text: response.commit.message };
+        })} />
       </div>;
   }
 }
