@@ -1,5 +1,4 @@
-export function getRepositories() {
-    const url = 'https://api.github.com/users/molbalazs/repos';
+export function getRepositories(url) {
     return fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -7,8 +6,8 @@ export function getRepositories() {
             }
             return response;
         })
-        .then((response) => response.json())
-        .then((data) => data.map(repository => {
+        .then(response => response.json())
+        .then(data => data.map(repository => {
                 return {
                     name: repository.full_name,
                     commitsUrl: repository.commits_url.split('{')[0],
